@@ -10,6 +10,7 @@ void main() async {
   // Bloc.observer = SimpleBlocObserver();
   runApp(
     DevicePreview(
+      enabled: false,
       builder: (context) => MainApp(
         userRepository: FirebaseUserRepo(),
       ),

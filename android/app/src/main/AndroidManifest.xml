@@ -8,9 +8,9 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <application
         android:name=".App"
-        android:label="a_group"
+        android:label="Arnayi"
         tools:replace="android:label"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/launcher_icon"
         android:enableOnBackInvokedCallback="false">
         <activity
             android:name=".MainActivity"
