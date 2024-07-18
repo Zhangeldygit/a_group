@@ -25,9 +25,9 @@ class HeaderInfo extends StatelessWidget {
                 title: 'Цена',
                 value: mln(plot.price?.toDouble() ?? 0),
               ),
-              const YInfoCommon(
+              YInfoCommon(
                 title: 'Назначение',
-                value: 'СНТ',
+                value: plot.appointment ?? '',
               ),
               YInfoCommon(
                 title: 'Сот',

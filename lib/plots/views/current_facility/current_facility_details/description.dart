@@ -41,7 +41,6 @@ class _DescriptionState extends State<Description> {
                 ),
                 Text(
                   widget.description ?? '',
-                  maxLines: 3,
                   style: GoogleFonts.manrope(
                     fontSize: 16,
                     fontWeight: FontWeight.w400,

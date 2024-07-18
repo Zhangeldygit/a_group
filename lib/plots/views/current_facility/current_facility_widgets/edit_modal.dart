@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:a_group/auth/auth_repository/models/user_model.dart';
 import 'package:a_group/auth/bloc/auth_bloc/auth_bloc.dart';
 import 'package:a_group/components/custom_button.dart';
@@ -8,6 +7,7 @@ import 'package:a_group/plots/plots_repository/models/plot_model.dart';
 import 'package:a_group/plots/views/create_plot/address_search_screen.dart';
 import 'package:a_group/plots/views/create_plot/create_plot_map_dialog_widget.dart';
 import 'package:a_group/plots/views/create_plot/create_plot_textfield.dart';
+import 'package:a_group/plots/views/current_facility/current_facility_widgets/status_modal.dart';
 import 'package:a_group/status/views/status_screen_widgets/appointment_modal.dart';
 import 'package:a_group/status/views/status_screen_widgets/divisibility_modal.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -17,15 +17,15 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:yandex_mapkit/yandex_mapkit.dart';
 
-class CreatePlotWidget extends StatefulWidget {
-  const CreatePlotWidget({super.key, required this.userName});
-  final String userName;
+class EditModal extends StatefulWidget {
+  const EditModal({super.key, required this.plot});
+  final Plot plot;
 
   @override
-  State<CreatePlotWidget> createState() => _CreatePlotWidgetState();
+  State<EditModal> createState() => _EditModalState();
 }
 
-class _CreatePlotWidgetState extends State<CreatePlotWidget> {
+class _EditModalState extends State<EditModal> {
   final TextEditingController addressController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController acreageController = TextEditingController();
@@ -37,6 +37,8 @@ class _CreatePlotWidgetState extends State<CreatePlotWidget> {
   Point? point;
   String appointment = 'Назначение';
   String divisibility = 'Делимость';
+  String status = 'Статуc';
+  bool? isEdit;
 
   MyUser? myUser;
   @override
@@ -68,18 +70,19 @@ class _CreatePlotWidgetState extends State<CreatePlotWidget> {
           Expanded(
             child: ListView(
               children: [
-                const SizedBox(height: 15),
                 Align(
                   alignment: Alignment.topRight,
                   child: IconButton(
                       onPressed: () {
-                        Navigator.pop(context);
+                        isEdit = true;
+                        Navigator.pop(context, isEdit);
                       },
                       icon: const Icon(
                         Icons.close,
                         color: Colors.white,
                       )),
                 ),
+                const SizedBox(height: 10),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -183,6 +186,23 @@ class _CreatePlotWidgetState extends State<CreatePlotWidget> {
                     ),
                   ),
                 ),
+                GestureDetector(
+                  onTap: () async {
+                    final result = await showModalBottomSheet(context: context, builder: (context) => StatusModal());
+                    setState(() {
+                      if (result != null) {
+                        status = result;
+                      }
+                    });
+                  },
+                  child: Card(
+                    color: const Color(0xFF191919),
+                    child: ListTile(
+                      title: Text(status, style: TextStyle(color: Colors.white, fontSize: 16)),
+                      trailing: Icon(Icons.arrow_forward_ios, color: Colors.white),
+                    ),
+                  ),
+                ),
                 const SizedBox(height: 15),
                 Text(
                   'Фотографии',
@@ -270,7 +290,7 @@ class _CreatePlotWidgetState extends State<CreatePlotWidget> {
                               context: context,
                               builder: (_) => const CreatePlotMapDialogWidget(),
                             );
-                            print("addreesssss zhan ${result[1]}");
+
                             setState(() {
                               point = result[0];
                               addressController.text = result[1];
@@ -303,60 +323,31 @@ class _CreatePlotWidgetState extends State<CreatePlotWidget> {
             child: CustomButton(
               title: 'Сохранить',
               onPressed: () {
-                if (descriptionController.text.isNotEmpty &&
-                    acreageController.text.isNotEmpty &&
-                    priceController.text.isNotEmpty &&
-                    addressController.text.isNotEmpty &&
-                    selectedImages.isNotEmpty) {
-                  context.read<GetPlotsBloc>().add(
-                        CreatePlot(
-                          plot: Plot(
-                            acreage: num.parse(acreageController.text),
-                            description: descriptionController.text,
-                            district: addressController.text,
-                            images: selectedImages,
-                            location: selectedToponym != null
-                                ? GeoPoint(selectedToponym?.balloonPoint.latitude ?? 0, selectedToponym?.balloonPoint.longitude ?? 0)
-                                : point != null
-                                    ? GeoPoint(point?.latitude ?? 0, point?.longitude ?? 0)
-                                    : const GeoPoint(0, 0),
-                            name: addressController.text,
-                            price: int.parse(priceController.text),
-                            status: 'Продается',
-                            myUser: myUser?.toEntity(),
-                            appointment: appointment,
-                            divisibility: divisibility,
-                          ),
+                isEdit = true;
+                context.read<GetPlotsBloc>().add(
+                      EditPlot(
+                        plot: Plot(
+                          acreage: acreageController.text.isNotEmpty ? num.tryParse(acreageController.text) : widget.plot.acreage,
+                          description: descriptionController.text.isNotEmpty ? descriptionController.text : widget.plot.description,
+                          district: addressController.text.isNotEmpty ? addressController.text : widget.plot.district,
+                          id: widget.plot.id,
+                          images: selectedImages.isNotEmpty ? selectedImages : null,
+                          location: selectedToponym != null
+                              ? GeoPoint(selectedToponym?.balloonPoint.latitude ?? 0, selectedToponym?.balloonPoint.longitude ?? 0)
+                              : point != null
+                                  ? GeoPoint(point?.latitude ?? 0, point?.longitude ?? 0)
+                                  : widget.plot.location,
+                          name: addressController.text.isNotEmpty ? addressController.text : widget.plot.name,
+                          price: priceController.text.isNotEmpty ? int.tryParse(priceController.text) : widget.plot.price,
+                          status: status != 'Статус' ? status : widget.plot.status,
+                          myUser: myUser?.toEntity(),
+                          appointment: appointment != 'Назначение' ? appointment : widget.plot.appointment,
+                          divisibility: divisibility != 'Делимость' ? divisibility : widget.plot.divisibility,
                         ),
-                      );
-                  context.read<GetPlotsBloc>().add(GetPlots(userType: myUser?.userType, userId: myUser?.userId));
-                  Navigator.pop(context);
-                } else {
-                  // context.read<GetPlotsBloc>().add(
-                  //       CreatePlot(
-                  //         plot: Plot(
-                  //           acreage: num.parse('8'),
-                  //           description: "new plot",
-                  //           district: "new plot",
-                  //           images: selectedImages,
-                  //           location: const GeoPoint(5, 5),
-                  //           name: "new plot",
-                  //           price: int.parse('5'),
-                  //           status: 'Продается',
-                  //           myUser: myUser?.toEntity(),
-                  //           appointment: appointment,
-                  //           divisibility: divisibility,
-                  //         ),
-                  //       ),
-                  //     );
-                  // context.read<GetPlotsBloc>().add(GetPlots(userType: myUser?.userType, userId: myUser?.userId));
-                  // Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Заполните все поля'),
-                    ),
-                  );
-                }
+                      ),
+                    );
+                Navigator.pop(context, isEdit);
+                Navigator.pop(context, isEdit);
               },
             ),
           ),

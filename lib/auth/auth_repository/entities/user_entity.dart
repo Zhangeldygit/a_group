@@ -1,9 +1,25 @@
+import 'package:hive_flutter/hive_flutter.dart';
+
+part 'user_entity.g.dart';
+
+@HiveType(typeId: 2)
 class MyUserEntity {
+  @HiveField(0)
   String userId;
+
+  @HiveField(1)
   String email;
+
+  @HiveField(2)
   String name;
+
+  @HiveField(3)
   String phone;
+
+  @HiveField(4)
   bool hasActiveCart;
+
+  @HiveField(5)
   String userType;
 
   MyUserEntity({

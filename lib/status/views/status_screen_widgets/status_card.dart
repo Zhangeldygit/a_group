@@ -10,6 +10,7 @@ class StatusCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final images = plot.images?.where((element) => element.contains('.jpg')).toList();
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -17,13 +18,19 @@ class StatusCard extends StatelessWidget {
           padding: const EdgeInsets.all(16.0),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(16),
-            child: CachedNetworkImage(
-              imageUrl:
-                  plot.images!.isNotEmpty ? plot.images?.first : 'https://t3.ftcdn.net/jpg/03/14/10/36/360_F_314103626_jMKyWmVEQI1uQQajMUxrAh8uzBLV6hEg.jpg',
-              fit: BoxFit.fitWidth,
-              height: 150,
-              width: double.infinity,
-            ),
+            child: images!.isNotEmpty
+                ? CachedNetworkImage(
+                    imageUrl: plot.images?.first,
+                    fit: BoxFit.fitWidth,
+                    height: 150,
+                    width: double.infinity,
+                  )
+                : Image.asset(
+                    'lib/assets/icons/plot.jpg',
+                    fit: BoxFit.cover,
+                    width: MediaQuery.of(context).size.width,
+                    height: 150,
+                  ),
           ),
         ),
         Padding(
@@ -50,6 +57,22 @@ class StatusCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             maxLines: 1,
             style: GoogleFonts.raleway(color: AppColors.iconColor, fontSize: 12, fontWeight: FontWeight.w500),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Text(
+            '${plot.status}',
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1,
+            style: GoogleFonts.raleway(
+                color: plot.status == 'Продается'
+                    ? Colors.green
+                    : plot.status == 'Продано'
+                        ? Colors.red
+                        : AppColors.iconColor,
+                fontSize: 12,
+                fontWeight: FontWeight.w500),
           ),
         ),
       ],

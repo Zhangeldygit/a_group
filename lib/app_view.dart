@@ -24,7 +24,6 @@ class MyAppView extends StatelessWidget {
         home: BlocBuilder<AuthenticationBloc, AuthenticationState>(
           builder: ((context, state) {
             if (state.status == AuthenticationStatus.authenticated) {
-              print('zhan ${state.user}');
               return MultiBlocProvider(
                 providers: [
                   BlocProvider(
@@ -34,10 +33,10 @@ class MyAppView extends StatelessWidget {
                     create: (context) => GetPlotsBloc(FirebasePlotsRepo())..add(GetPlots(userType: state.user?.userType, userId: state.user?.userId)),
                   ),
                   BlocProvider<StatusCubit>(
-                    create: (context) => StatusCubit(FirebasePlotsRepo())..filterByCategory('Все'),
+                    create: (context) => StatusCubit(FirebasePlotsRepo())..filterByCategory(userType: state.user?.userType, userId: state.user?.userId),
                   )
                 ],
-                child: const MainScreen(),
+                child: MainScreen(user: state.user),
               );
             } else {
               return const WelcomeScreen();

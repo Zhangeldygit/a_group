@@ -1,8 +1,8 @@
 import 'package:a_group/plots/plots_repository/models/plot_model.dart';
-import 'package:a_group/plots/views/current_facility/header_address.dart';
-import 'package:a_group/plots/views/current_facility/header_images.dart';
-import 'package:a_group/plots/views/current_facility/header_info.dart';
-import 'package:a_group/plots/views/current_facility/header_user_actions.dart';
+import 'package:a_group/plots/views/current_facility/current_facility_widgets/header_address.dart';
+import 'package:a_group/plots/views/current_facility/current_facility_widgets/header_images.dart';
+import 'package:a_group/plots/views/current_facility/current_facility_widgets/header_info.dart';
+import 'package:a_group/plots/views/current_facility/current_facility_widgets/header_user_actions.dart';
 import 'package:flutter/material.dart';
 
 class CurrentFacilityHeader extends StatelessWidget {

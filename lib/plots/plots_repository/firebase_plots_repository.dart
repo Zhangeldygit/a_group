@@ -12,20 +12,19 @@ import 'package:firebase_storage/firebase_storage.dart';
 class FirebasePlotsRepo implements PlotsRepository {
   final plotCollection = FirebaseFirestore.instance.collection('plots');
   final usersCollection = FirebaseFirestore.instance.collection('users');
-  // final userId = FirebaseAuth.instance.currentUser?.uid;
 
   @override
   Future<List<Plot>> getPlots({String? userType, String? userId}) async {
     try {
       if (userType != null && userType != 'customer' && userId != null) {
         final plots = plotCollection
-            .where('user_id', isEqualTo: userId)
+            .where('user.userId', isEqualTo: userId)
             .get()
-            .then((value) => value.docs.map((e) => Plot.fromEntity(PlotEntity.fromDocument(e.data()))).toList());
+            .then((value) => value.docs.map((e) => Plot.fromEntity(PlotEntity.fromDocument(e.data(), id: e.id))).toList());
 
         return plots;
       } else {
-        return plotCollection.get().then((value) => value.docs.map((e) => Plot.fromEntity(PlotEntity.fromDocument(e.data()))).toList());
+        return plotCollection.get().then((value) => value.docs.map((e) => Plot.fromEntity(PlotEntity.fromDocument(e.data(), id: e.id))).toList());
       }
     } catch (e) {
       log("zannnn get plotsss ${e.toString()}");
@@ -36,23 +35,26 @@ class FirebasePlotsRepo implements PlotsRepository {
   @override
   Future<void> createPlot(Plot plot) async {
     List<String> downloadUrls = await uploadImages(plot.images!);
-
+    // if (plot.images != null) {
+    //   downloadUrls = ;
+    // }
     try {
-      return await plotCollection.doc(plot.id).set(
-            Plot(
-              acreage: plot.acreage,
-              description: plot.description,
-              district: plot.district,
-              id: plot.id,
-              userId: plot.userId,
-              images: downloadUrls,
-              location: plot.location,
-              name: plot.name,
-              price: plot.price,
-              status: plot.status,
-              userName: plot.userName,
-            ).toEntity().toDocument(),
-          );
+      await plotCollection.add(
+        Plot(
+          acreage: plot.acreage,
+          description: plot.description,
+          district: plot.district,
+          id: plotCollection.doc().id,
+          images: downloadUrls,
+          location: plot.location,
+          name: plot.name,
+          price: plot.price,
+          status: plot.status,
+          myUser: plot.myUser,
+          appointment: plot.appointment,
+          divisibility: plot.divisibility,
+        ).toEntity().toDocument(),
+      );
     } catch (e) {
       log(e.toString());
       rethrow;
@@ -71,6 +73,36 @@ class FirebasePlotsRepo implements PlotsRepository {
       rethrow;
     }
   }
+
+  @override
+  Future<void> editPlot(Plot plot) async {
+    List<String> downloadUrls = [];
+    if (plot.images != null && plot.images!.isNotEmpty) {
+      downloadUrls = await uploadImages(plot.images!);
+    }
+
+    try {
+      return await plotCollection.doc(plot.id).update(
+            Plot(
+              acreage: plot.acreage,
+              description: plot.description,
+              district: plot.district,
+              id: plot.id,
+              images: downloadUrls,
+              location: plot.location,
+              name: plot.name,
+              price: plot.price,
+              status: plot.status,
+              myUser: plot.myUser,
+              appointment: plot.appointment,
+              divisibility: plot.divisibility,
+            ).toEntity().toDocument(),
+          );
+    } catch (e) {
+      log(e.toString());
+      rethrow;
+    }
+  }
 }
 
 Future<List<String>> uploadImages(List<dynamic> images) async {
@@ -81,7 +113,13 @@ Future<List<String>> uploadImages(List<dynamic> images) async {
     for (File image in images) {
       FirebaseStorage storage = FirebaseStorage.instance;
       String imageName = DateTime.now().millisecondsSinceEpoch.toString();
-      Reference ref = storage.ref().child('images/$imageName.jpg');
+      Reference ref;
+      if (image.path.contains('.mp4')) {
+        ref = storage.ref().child('images/$imageName.mp4');
+      } else {
+        ref = storage.ref().child('images/$imageName.jpg');
+      }
+
       await ref.putFile(image);
 
       // Get the download URL for the uploaded image

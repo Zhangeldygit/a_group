@@ -9,6 +9,7 @@ import 'package:a_group/plots/views/user_plots_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
 
 class PlotsScreen extends StatefulWidget {
@@ -20,6 +21,10 @@ class PlotsScreen extends StatefulWidget {
 
 class _PlotsScreenState extends State<PlotsScreen> {
   MyUser? myUser;
+  void loadBox() async {
+    await Hive.openBox('plots_${myUser?.userId}');
+  }
+
   @override
   void initState() {
     context.read<AuthenticationBloc>().userRepository.user.first.then((value) {
@@ -31,6 +36,7 @@ class _PlotsScreenState extends State<PlotsScreen> {
         context.read<GetPlotsBloc>().add(GetUsers());
       }
     });
+    loadBox();
     super.initState();
   }
 
@@ -49,8 +55,7 @@ class _PlotsScreenState extends State<PlotsScreen> {
         backgroundColor: const Color(0xFF0D0D0D),
         body: BlocBuilder<GetPlotsBloc, GetPlotsState>(
           builder: (context, state) {
-            print("zhan states $state");
-            if (state is GetPlotsSuccess) {
+            if (myUser?.userType == 'seller' && state is GetPlotsSuccess) {
               return Column(
                 children: [
                   Row(
@@ -69,8 +74,6 @@ class _PlotsScreenState extends State<PlotsScreen> {
                                 ),
                               ).then((value) {
                                 context.read<GetPlotsBloc>().add(GetPlots(userType: myUser?.userType, userId: myUser?.userId));
-                                // Future.delayed(const Duration(seconds: 1),
-                                //     () => context.read<GetPlotsBloc>().add(GetPlots(userType: myUser?.userType, userId: myUser?.userId)));
                               }),
                               child: Container(
                                 decoration: BoxDecoration(
@@ -124,7 +127,7 @@ class _PlotsScreenState extends State<PlotsScreen> {
                       cacheExtent: 1500.0,
                       padding: const EdgeInsets.only(top: 20, bottom: 10),
                       itemBuilder: (_, index) {
-                        return FacilityCard(plot: state.plots[index]);
+                        return FacilityCard(plot: state.plots[index], user: myUser);
                       },
                     ),
                   ),
@@ -144,28 +147,51 @@ class _PlotsScreenState extends State<PlotsScreen> {
                             initialText: state.users[index].phone);
                         return GestureDetector(
                           onTap: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => BlocProvider(
-                                        create: (context) => GetPlotsBloc(FirebasePlotsRepo())
-                                          ..add(GetPlots(userId: state.users[index].userId, userType: state.users[index].userType)),
-                                        child: UserPlotsScreen(user: state.users[index]),
-                                      ))),
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => BlocProvider(
+                                create: (context) =>
+                                    GetPlotsBloc(FirebasePlotsRepo())..add(GetPlots(userId: state.users[index].userId, userType: state.users[index].userType)),
+                                child: UserPlotsScreen(user: state.users[index], currentUser: myUser),
+                              ),
+                            ),
+                          ),
                           child: Container(
                             margin: const EdgeInsets.only(bottom: 8),
                             decoration: const BoxDecoration(
                               color: Color(0xFF191919),
                             ),
-                            child: ListTile(
-                              title: Text(
-                                state.users[index].name,
-                                style: const TextStyle(color: Colors.white),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Row(
+                                children: [
+                                  const CircleAvatar(backgroundColor: Colors.grey, child: Icon(Icons.person_2_outlined)),
+                                  SizedBox(width: 15),
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        state.users[index].name,
+                                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                      ),
+                                      Text(
+                                        state.users[index].email,
+                                        style: const TextStyle(color: Colors.grey),
+                                      ),
+                                      Text(
+                                        phone.getMaskedText(),
+                                        style: const TextStyle(color: Colors.grey),
+                                      ),
+                                    ],
+                                  ),
+                                  Spacer(),
+                                  Text(
+                                    'Участки',
+                                    style: const TextStyle(color: Colors.white),
+                                  ),
+                                  Icon(Icons.arrow_forward_ios, color: Colors.white),
+                                ],
                               ),
-                              subtitle: Text(
-                                phone.getMaskedText(),
-                                style: const TextStyle(color: Colors.white),
-                              ),
-                              leading: const CircleAvatar(backgroundColor: Colors.grey, child: Icon(Icons.person_2_outlined)),
                             ),
                           ),
                         );

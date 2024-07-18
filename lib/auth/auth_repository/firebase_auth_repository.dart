@@ -65,4 +65,10 @@ class FirebaseUserRepo implements AuthRepository {
       rethrow;
     }
   }
+
+  @override
+  Future<void> deleteUser(MyUser myUser) async {
+    await usersCollection.doc(myUser.userId).delete();
+    await _firebaseAuth.currentUser?.delete();
+  }
 }

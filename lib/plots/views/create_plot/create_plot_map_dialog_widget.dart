@@ -52,7 +52,9 @@ class _CreatePlotMapDialogWidgetState extends State<CreatePlotMapDialogWidget> {
                   final result = YandexSearch.searchByPoint(point: point!, searchOptions: const SearchOptions());
                   result.then((searchResult) {
                     searchResult.$2.then((value) {
-                      addressName = value.items?.first.name;
+                      print("www ${value.items?.first.toponymMetadata?.address.formattedAddress}");
+                      print("ggg ${value.items?.first.toponymMetadata?.address.addressComponents}");
+                      addressName = value.items?.first.toponymMetadata?.address.formattedAddress;
                     });
                   });
                   mapController?.moveCamera(

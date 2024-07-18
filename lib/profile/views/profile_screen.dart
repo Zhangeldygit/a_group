@@ -103,12 +103,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               const Spacer(),
               CustomButton(
+                title: 'Удалить Аккаунт',
+                onPressed: () async {
+                  await showAdaptiveDialog(
+                    context: context,
+                    builder: (_) {
+                      return AlertDialog(
+                        actionsAlignment: MainAxisAlignment.center,
+                        content: Text('Вы точно хотите удалить аккаунт?'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: Text('Нет'),
+                          ),
+                          TextButton(
+                            onPressed: () async {
+                              Navigator.pop(context);
+                              context.read<SignInBloc>().add(DeleteUserRequired(user: myUser!));
+                            },
+                            child: Text('Да'),
+                          )
+                        ],
+                      );
+                    },
+                  );
+                },
+              ),
+              const SizedBox(height: 10),
+              CustomButton(
                 title: 'Выйти',
                 onPressed: () {
                   context.read<SignInBloc>().add(SignOutRequired());
                 },
               ),
-              const SizedBox(height: 10)
             ],
           ),
         ),

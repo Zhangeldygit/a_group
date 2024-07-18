@@ -18,3 +18,9 @@ class SignInRequired extends SignInEvent {
 }
 
 class SignOutRequired extends SignInEvent {}
+
+class DeleteUserRequired extends SignInEvent {
+  final MyUser user;
+
+  DeleteUserRequired({required this.user});
+}

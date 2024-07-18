@@ -1,23 +1,86 @@
+import 'package:a_group/auth/auth_repository/models/user_model.dart';
+import 'package:a_group/plots/bloc/plots_bloc.dart';
+import 'package:a_group/plots/plots_repository/firebase_plots_repository.dart';
 import 'package:a_group/plots/plots_repository/models/plot_model.dart';
 import 'package:a_group/plots/views/current_facility/current_facility_screen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
-class FacilityCard extends StatelessWidget {
+class FacilityCard extends StatefulWidget {
   final Plot plot;
-  const FacilityCard({super.key, required this.plot});
+  final MyUser? user;
+  const FacilityCard({super.key, required this.plot, this.user});
+
+  @override
+  State<FacilityCard> createState() => _FacilityCardState();
+}
+
+class _FacilityCardState extends State<FacilityCard> {
+  bool isFavorite = false;
+  Box? favoritesBox;
+  String address = '';
+  String region = '';
+  String district = '';
+
+  void toggleFavorite() async {
+    await Hive.openBox('plots_${widget.user?.userId}');
+    setState(() {
+      favoritesBox = Hive.box('plots_${widget.user?.userId}');
+      if (isFavorite) {
+        favoritesBox?.delete(widget.plot.id);
+      } else {
+        favoritesBox?.put(widget.plot.id, widget.plot);
+      }
+    });
+    loadFavorites();
+  }
+
+  void loadFavorites() async {
+    await Hive.openBox('plots_${widget.user?.userId}');
+    favoritesBox = Hive.box('plots_${widget.user?.userId}');
+    isFavorite = favoritesBox?.containsKey(widget.plot.id) ?? false;
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    loadFavorites();
+    extractParts(widget.plot.name ?? '');
+    super.initState();
+  }
+
+  void extractParts(String name) {
+    final parts = name.split(', ');
+    if (parts.length >= 3) {
+      address = parts.length >= 4 ? "${parts[parts.length - 2]}, ${parts[parts.length - 1]}" : parts[parts.length - 1];
+      region = parts.length >= 3 ? parts[1] : '';
+      district = parts.length >= 4 ? parts[2] : (parts.length >= 3 ? parts[1] : '');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final images = widget.plot.images?.where((element) => element.contains('.jpg')).toList();
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => CurrentFacilityScreen(plot: plot),
+            builder: (context) => BlocProvider(
+              create: (context) => GetPlotsBloc(FirebasePlotsRepo()),
+              child: CurrentFacilityScreen(plot: widget.plot, user: widget.user),
+            ),
           ),
+        ).then(
+          (value) {
+            if (value != null) {
+              context.read<GetPlotsBloc>().add(GetPlots(userType: widget.user?.userType, userId: widget.user?.userId));
+            }
+          },
         );
       },
       child: Container(
@@ -30,15 +93,15 @@ class FacilityCard extends StatelessWidget {
           children: [
             ClipRRect(
               borderRadius: BorderRadius.circular(10.0),
-              child: plot.images!.isNotEmpty
+              child: images!.isNotEmpty
                   ? CachedNetworkImage(
-                      imageUrl: plot.images?.first ?? '',
+                      imageUrl: widget.plot.images?.first ?? '',
                       fit: BoxFit.cover,
                       width: MediaQuery.of(context).size.width,
                       height: 110,
                     )
                   : Image.asset(
-                      'lib/assets/icons/map_pin3.png',
+                      'lib/assets/icons/plot.jpg',
                       fit: BoxFit.cover,
                       width: MediaQuery.of(context).size.width,
                       height: 110,
@@ -48,7 +111,7 @@ class FacilityCard extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Text(
-                plot.name ?? '',
+                address,
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
                 style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: const Color(0xFFD0D0D0)),
@@ -58,8 +121,15 @@ class FacilityCard extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12),
               child: Text(
-                "${plot.price} ТГ",
+                "${widget.plot.price} ТГ",
                 style: GoogleFonts.poppins(fontSize: 9, fontWeight: FontWeight.w600, color: const Color(0xFF1A75FF)),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              child: Text(
+                "Сот/Участок ${widget.plot.acreage}",
+                style: GoogleFonts.poppins(fontSize: 9, fontWeight: FontWeight.w600, color: const Color(0xFFB9B9B9)),
               ),
             ),
             Padding(
@@ -69,76 +139,35 @@ class FacilityCard extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      plot.district ?? '',
-                      style: GoogleFonts.poppins(fontSize: 9, fontWeight: FontWeight.w600, color: const Color(0xFFB9B9B9)),
+                      widget.plot.status ?? '',
+                      style: GoogleFonts.poppins(
+                          fontSize: 9,
+                          fontWeight: FontWeight.w600,
+                          color: widget.plot.status == 'Продается'
+                              ? Colors.green
+                              : widget.plot.status == 'Продано'
+                                  ? Colors.red
+                                  : const Color(0xFFB9B9B9)),
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1,
                     ),
                   ),
-                  SvgPicture.asset(
-                    'lib/assets/icons/Vector.svg',
-                    height: 16,
-                  )
+                  GestureDetector(
+                    onTap: () {
+                      if (widget.user?.userType == 'customer') {
+                        toggleFavorite();
+                      }
+                    },
+                    child: widget.user?.userType == 'customer'
+                        ? Icon(isFavorite == false ? Icons.favorite_border : Icons.favorite, color: isFavorite == false ? Colors.white : Colors.red)
+                        : SvgPicture.asset('lib/assets/icons/Vector.svg', height: 16),
+                  ),
                 ],
               ),
             ),
           ],
         ),
       ),
-
-      // Container(
-      //   margin: const EdgeInsets.symmetric(horizontal: 8),
-      //   padding: const EdgeInsets.all(8),
-      //   decoration: const BoxDecoration(
-      //     color: AppColors.backgroundColor,
-      //     border: Border(
-      //       bottom: BorderSide(width: 0.2, color: Color(0xFF667085)),
-      //     ),
-      //   ),
-      //   child: Row(
-      //     children: [
-      //       Stack(
-      //         children: [
-      //           ClipRRect(
-      //             borderRadius: BorderRadius.circular(4.0),
-      //             child: CachedNetworkImage(
-      //               imageUrl: plot.images.first,
-      //               // 'https://images.ctfassets.net/hrltx12pl8hq/a2hkMAaruSQ8haQZ4rBL9/8ff4a6f289b9ca3f4e6474f29793a74a/nature-image-for-website.jpg?fit=fill&w=600&h=400',
-      //               // cacheKey: '$facilityId/$imageUrl',
-      //               memCacheWidth: (108.0 * MediaQuery.of(context).devicePixelRatio).toInt(),
-      //               filterQuality: FilterQuality.medium,
-      //               // placeholder: (context, url) => Container(
-      //               //   color: context.ytheme.bottomSheetContainerColor,
-      //               //   width: YSizes.facilityListImagePreview,
-      //               //   height: YSizes.facilityListImagePreview,
-      //               // ),
-      //               // errorWidget: (_, __, ___) => errorWidget,
-      //               width: 108.0,
-      //               height: 108.0,
-      //               fit: BoxFit.cover,
-      //             ),
-      //           ),
-      //         ],
-      //       ),
-      //       Expanded(
-      //         child: Padding(
-      //           padding: const EdgeInsets.symmetric(horizontal: 8),
-      //           child: Column(
-      //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      //             crossAxisAlignment: CrossAxisAlignment.start,
-      //             children: [
-      //               Header(plot: plot),
-      //               // if (facility.isApartment || facility.isApartmentsComplex) _Apartments(facility),
-      //               // if (facility.isCommerce || facility.isParking || facility.isPlot) _Commercials(facility),
-      //               // if (facility.isHouse || facility.isHousesComplex) _Houses(facility),
-      //               Footer(plot: plot),
-      //             ],
-      //           ),
-      //         ),
-      //       ),
-      //     ],
-      //   ),
-      // ),
     );
   }
 }

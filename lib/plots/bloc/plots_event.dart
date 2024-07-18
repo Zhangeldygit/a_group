@@ -23,4 +23,10 @@ class CreatePlot extends GetPlotsEvent {
   const CreatePlot({required this.plot});
 }
 
+class EditPlot extends GetPlotsEvent {
+  final Plot plot;
+
+  const EditPlot({required this.plot});
+}
+
 class GetUsers extends GetPlotsEvent {}

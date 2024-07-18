@@ -22,11 +22,20 @@ final class GetPlotsSuccess extends GetPlotsState {
   List<Object> get props => [plots];
 }
 
+//--------------------------------------------------------
 final class CreatePlotLoading extends GetPlotsState {}
 
 final class CreatePlotSuccess extends GetPlotsState {}
 
 final class CreatePlotFailure extends GetPlotsState {}
+
+// ------------------------------------------------------
+
+final class EditPlotLoading extends GetPlotsState {}
+
+final class EditPlotSuccess extends GetPlotsState {}
+
+final class EditPlotFailure extends GetPlotsState {}
 
 // ------------------------------------------------------
 final class GetUsersLoading extends GetPlotsState {}

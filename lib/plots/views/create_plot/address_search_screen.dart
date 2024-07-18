@@ -180,18 +180,14 @@ class _AddressSearchScreenState extends State<AddressSearchScreen> {
     });
 
     if (result.error != null) {
-      print('Error: ${result.error}');
       return;
     }
-
-    print('Page ${result.page}: $result');
 
     setState(() {
       results.add(result);
     });
 
     if (await widget.session.hasNextPage()) {
-      print('Got ${result.found} items, fetching next page...');
       setState(() {
         _progress = true;
       });

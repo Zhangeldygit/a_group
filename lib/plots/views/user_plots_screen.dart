@@ -7,8 +7,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class UserPlotsScreen extends StatefulWidget {
-  const UserPlotsScreen({super.key, required this.user});
-  final MyUser user;
+  const UserPlotsScreen({super.key, required this.user, this.currentUser});
+  final MyUser? user;
+  final MyUser? currentUser;
 
   @override
   State<UserPlotsScreen> createState() => _UserPlotsScreenState();
@@ -73,7 +74,7 @@ class _UserPlotsScreenState extends State<UserPlotsScreen> {
                     cacheExtent: 1500.0,
                     padding: const EdgeInsets.only(top: 20, bottom: 10),
                     itemBuilder: (_, index) {
-                      return FacilityCard(plot: state.plots[index]);
+                      return FacilityCard(plot: state.plots[index], user: widget.currentUser);
                     },
                   ),
                 ),

@@ -6,4 +6,5 @@ abstract class PlotsRepository {
   Future<void> createPlot(Plot plot);
 
   Future<List<MyUser>> getUsers();
+  Future<void> editPlot(Plot plot);
 }

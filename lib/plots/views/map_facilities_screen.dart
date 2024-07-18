@@ -19,7 +19,7 @@ class _MapFacilitiesScreenState extends State<MapFacilitiesScreen> {
   @override
   void dispose() {
     _mapController.deselectGeoObject();
-    // _mapController.dispose();
+    _mapController.dispose();
     super.dispose();
   }
 
@@ -45,8 +45,8 @@ class _MapFacilitiesScreenState extends State<MapFacilitiesScreen> {
             CameraUpdate.newCameraPosition(
               CameraPosition(
                 target: Point(
-                  latitude: widget.plots.first.location?.latitude ?? 0,
-                  longitude: widget.plots.first.location?.longitude ?? 0,
+                  latitude: widget.plots.first.location?.latitude == 0 ? 43.238949 : widget.plots.first.location?.latitude ?? 43.238949,
+                  longitude: widget.plots.first.location?.longitude == 0 ? 76.889709 : widget.plots.first.location?.longitude ?? 76.889709,
                 ),
                 zoom: 15,
               ),
@@ -107,7 +107,7 @@ class _MapFacilitiesScreenState extends State<MapFacilitiesScreen> {
         .map(
           (point) => PlacemarkMapObject(
             mapId: MapObjectId('MapObject ${point.id}'),
-            point: Point(latitude: point.location?.latitude ?? 0, longitude: point.location?.longitude ?? 0),
+            point: Point(latitude: point.location?.latitude ?? 43.238949, longitude: point.location?.longitude ?? 76.889709),
             opacity: 1,
             icon: PlacemarkIcon.single(
               PlacemarkIconStyle(

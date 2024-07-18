@@ -33,6 +33,18 @@ class GetPlotsBloc extends Bloc<GetPlotsEvent, GetPlotsState> {
       },
     );
 
+    on<EditPlot>(
+      (event, emit) async {
+        emit(EditPlotLoading());
+        try {
+          await _plotsRepo.editPlot(event.plot);
+          emit(EditPlotSuccess());
+        } catch (e) {
+          emit(EditPlotFailure());
+        }
+      },
+    );
+
     on<GetUsers>((event, emit) async {
       emit(GetUsersLoading());
       try {

@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:a_group/plots/plots_repository/models/plot_model.dart';
-import 'package:a_group/plots/views/current_facility/header_image.dart';
+import 'package:a_group/plots/views/current_facility/current_facility_widgets/header_image.dart';
 import 'package:flutter/material.dart';
 
 class HeaderImages extends StatefulWidget {
@@ -25,7 +25,6 @@ class _YHeaderImagesState extends State<HeaderImages> {
       alignment: Alignment.topCenter,
       children: [
         HeaderImage(
-          // facilityId: widget.facility.id,
           images: widget.plot.images ?? [],
           streamController: streamController,
         ),

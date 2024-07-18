@@ -24,26 +24,12 @@ class HeaderAddress extends StatelessWidget {
               children: [
                 Text(
                   plot.name ?? '',
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.manrope(
                     fontSize: 20,
                     fontWeight: FontWeight.w600,
                     color: Colors.white,
                   ),
                 ),
-                // Padding(
-                //   padding: const EdgeInsets.only(top: 5.0),
-                //   child: Text(
-                //     plot.district ?? '',
-                //     maxLines: 3,
-                //     style: GoogleFonts.manrope(
-                //       fontSize: 16,
-                //       fontWeight: FontWeight.w400,
-                //       color: Colors.grey,
-                //     ),
-                //   ),
-                // ),
               ],
             ),
           ),
@@ -55,7 +41,6 @@ class HeaderAddress extends StatelessWidget {
                 borderRadius: BorderRadius.circular(10.0),
               ),
               child: InkWell(
-                // onTap: () => _showDialog(context),
                 child: Container(
                   width: 38.0,
                   height: 38.0,

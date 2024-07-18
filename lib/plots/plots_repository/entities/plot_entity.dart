@@ -1,3 +1,4 @@
+import 'package:a_group/auth/auth_repository/entities/user_entity.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PlotEntity {
@@ -5,26 +6,28 @@ class PlotEntity {
   String? description;
   String? district;
   String? id;
-  String? userId;
   List<dynamic>? images;
   GeoPoint? location;
   String? name;
   int? price;
   String? status;
-  String? userName;
+  MyUserEntity? myUser;
+  String? appointment;
+  String? divisibility;
 
   PlotEntity({
     required this.acreage,
     required this.description,
     required this.district,
     this.id,
-    this.userId,
     required this.images,
     required this.location,
     required this.name,
     required this.price,
     required this.status,
-    required this.userName,
+    this.myUser,
+    this.appointment,
+    this.divisibility,
   });
 
   Map<String, Object?> toDocument() {
@@ -33,28 +36,31 @@ class PlotEntity {
       'description': description,
       'district': district,
       'id': id,
-      'user_id': userId,
       'images': images,
       'location': location,
       'name': name,
       'price': price,
       'status': status,
-      'user_name': userName,
+      'user': myUser?.toDocument(),
+      'appointment': appointment,
+      'divisibility': divisibility,
     };
   }
 
-  static PlotEntity fromDocument(Map<String, dynamic> doc) {
+  static PlotEntity fromDocument(Map<String, dynamic> doc, {String? id}) {
     return PlotEntity(
       acreage: doc['acreage'],
       description: doc['description'],
       district: doc['district'],
-      id: doc['id'],
+      id: id ?? '',
       images: doc['images'],
       location: doc['location'],
       name: doc['name'],
       price: doc['price'],
       status: doc['status'],
-      userName: doc['user_name'],
+      myUser: MyUserEntity.fromDocument(doc['user']),
+      appointment: doc['appointment'],
+      divisibility: doc['divisibility'],
     );
   }
 }
