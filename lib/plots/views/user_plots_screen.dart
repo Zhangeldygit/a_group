@@ -63,19 +63,22 @@ class _UserPlotsScreenState extends State<UserPlotsScreen> {
                   ],
                 ),
                 Expanded(
-                  child: GridView.builder(
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2, // number of items in each row
-                      mainAxisSpacing: 18.0, // spacing between rows
-                      crossAxisSpacing: 18.0,
+                  child: Padding(
+                    padding: const EdgeInsets.all(3.0),
+                    child: GridView.builder(
+                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2, // number of items in each row
+                        mainAxisSpacing: 18.0, // spacing between rows
+                        crossAxisSpacing: 18.0,
+                      ),
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      itemCount: state.plots.length,
+                      cacheExtent: 1500.0,
+                      padding: const EdgeInsets.only(top: 20, bottom: 10),
+                      itemBuilder: (_, index) {
+                        return FacilityCard(plot: state.plots[index], user: widget.currentUser);
+                      },
                     ),
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    itemCount: state.plots.length,
-                    cacheExtent: 1500.0,
-                    padding: const EdgeInsets.only(top: 20, bottom: 10),
-                    itemBuilder: (_, index) {
-                      return FacilityCard(plot: state.plots[index], user: widget.currentUser);
-                    },
                   ),
                 ),
               ],

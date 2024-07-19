@@ -65,7 +65,7 @@ class CurrentFacilityScreen extends StatelessWidget {
               ],
             ),
           ),
-          plot.myUser?.userType != 'seller'
+          user?.userType != 'seller'
               ? Align(
                   alignment: Alignment.bottomRight,
                   child: Row(

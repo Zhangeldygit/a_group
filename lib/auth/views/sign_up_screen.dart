@@ -248,8 +248,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                 myUser.name = nameController.text;
                                 myUser.phone = maskFormatter.getUnmaskedText();
                                 myUser.userType = value;
-
-                                context.read<SignUpBloc>().add(SignUpRequired(myUser, passwordController.text));
+                                context.read<SignUpBloc>().add(SignUpRequired(myUser, passwordController.text, value));
                               }
                             });
                           }

@@ -23,7 +23,13 @@ class FirebaseUserRepo implements AuthRepository {
       if (firebaseUser == null) {
         yield MyUser.empty;
       } else {
-        yield await usersCollection.doc(firebaseUser.uid).get().then((value) => MyUser.fromEntity(MyUserEntity.fromDocument(value.data()!)));
+        yield await usersCollection.doc(firebaseUser.uid).get().then((value) async {
+          if (value.data() != null) {
+            return MyUser.fromEntity(MyUserEntity.fromDocument(value.data()!));
+          } else {
+            return await sellersCollection.doc(firebaseUser.uid).get().then((value) => MyUser.fromEntity(MyUserEntity.fromDocument(value.data()!)));
+          }
+        });
       }
     });
   }
@@ -57,9 +63,13 @@ class FirebaseUserRepo implements AuthRepository {
   }
 
   @override
-  Future<void> setUserData(MyUser myUser) async {
+  Future<void> setUserData(MyUser myUser, String userType) async {
     try {
-      await usersCollection.doc(myUser.userId).set(myUser.toEntity().toDocument());
+      if (userType == 'seller') {
+        await sellersCollection.doc(myUser.userId).set(myUser.toEntity().toDocument());
+      } else {
+        await usersCollection.doc(myUser.userId).set(myUser.toEntity().toDocument());
+      }
     } catch (e) {
       log("zahnnnn set user Data ${e.toString()}");
       rethrow;
@@ -68,7 +78,12 @@ class FirebaseUserRepo implements AuthRepository {
 
   @override
   Future<void> deleteUser(MyUser myUser) async {
-    await usersCollection.doc(myUser.userId).delete();
-    await _firebaseAuth.currentUser?.delete();
+    if (myUser.userType == 'seller') {
+      await sellersCollection.doc(myUser.userId).delete();
+      await _firebaseAuth.currentUser?.delete();
+    } else {
+      await usersCollection.doc(myUser.userId).delete();
+      await _firebaseAuth.currentUser?.delete();
+    }
   }
 }

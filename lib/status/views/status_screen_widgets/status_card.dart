@@ -20,7 +20,7 @@ class StatusCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             child: images!.isNotEmpty
                 ? CachedNetworkImage(
-                    imageUrl: plot.images?.first,
+                    imageUrl: images.first,
                     fit: BoxFit.fitWidth,
                     height: 150,
                     width: double.infinity,

@@ -65,109 +65,246 @@ class _FacilityCardState extends State<FacilityCard> {
   @override
   Widget build(BuildContext context) {
     final images = widget.plot.images?.where((element) => element.contains('.jpg')).toList();
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => BlocProvider(
-              create: (context) => GetPlotsBloc(FirebasePlotsRepo()),
-              child: CurrentFacilityScreen(plot: widget.plot, user: widget.user),
-            ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // double screenWidth = constraints.maxWidth;
+        // double imageHeight = screenWidth * 0.6;
+        // double padding = screenWidth * 0.04;
+        // double textFontSize = screenWidth * 0.05;
+        // double statusFontSize = screenWidth * 0.035;
+        // double iconSize = screenWidth * 0.1;
+
+        double screenWidth = constraints.maxWidth;
+        double imageHeight = screenWidth * 0.450; // Adjust based on your design
+        double padding = screenWidth * 0.03;
+        double titleFontSize = 14.0;
+        double priceFontSize = 11.0;
+        double addressFontSize = 11.0;
+        double iconSize = 22.0;
+
+        double containerHeight = imageHeight + 120;
+
+        return Container(
+          decoration: BoxDecoration(
+            color: const Color(0xFF151515),
+            borderRadius: BorderRadius.circular(10.0),
           ),
-        ).then(
-          (value) {
-            if (value != null) {
-              context.read<GetPlotsBloc>().add(GetPlots(userType: widget.user?.userType, userId: widget.user?.userId));
-            }
-          },
-        );
-      },
-      child: Container(
-        decoration: BoxDecoration(
-          color: const Color(0xFF151515),
-          borderRadius: BorderRadius.circular(10.0),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(10.0),
-              child: images!.isNotEmpty
-                  ? CachedNetworkImage(
-                      imageUrl: widget.plot.images?.first ?? '',
-                      fit: BoxFit.cover,
-                      width: MediaQuery.of(context).size.width,
-                      height: 110,
-                    )
-                  : Image.asset(
-                      'lib/assets/icons/plot.jpg',
-                      fit: BoxFit.cover,
-                      width: MediaQuery.of(context).size.width,
-                      height: 110,
+          height: containerHeight, // Set the height of the container
+          width: screenWidth,
+          // padding: EdgeInsets.only(
+          //   left: 5,
+          //   right: 5,
+          // ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => BlocProvider(
+                        create: (context) => GetPlotsBloc(FirebasePlotsRepo()),
+                        child: CurrentFacilityScreen(plot: widget.plot, user: widget.user),
+                      ),
                     ),
-            ),
-            const SizedBox(height: 6),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Text(
-                address,
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
-                style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: const Color(0xFFD0D0D0)),
+                  ).then(
+                    (value) {
+                      if (value != null) {
+                        context.read<GetPlotsBloc>().add(GetPlots(userType: widget.user?.userType, userId: widget.user?.userId));
+                      }
+                    },
+                  );
+                },
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(10.0),
+                  child: images!.isNotEmpty
+                      ? CachedNetworkImage(
+                          imageUrl: images.first ?? '',
+                          fit: BoxFit.cover,
+                          width: screenWidth,
+                          height: imageHeight,
+                        )
+                      : Image.asset(
+                          'lib/assets/icons/plot.jpg',
+                          fit: BoxFit.cover,
+                          width: screenWidth,
+                          height: imageHeight,
+                        ),
+                ),
               ),
-            ),
-            const SizedBox(height: 6),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Text(
-                "${widget.plot.price} ТГ",
-                style: GoogleFonts.poppins(fontSize: 9, fontWeight: FontWeight.w600, color: const Color(0xFF1A75FF)),
+              const SizedBox(height: 2),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: padding),
+                child: Text(
+                  address,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                  style: GoogleFonts.poppins(fontSize: titleFontSize, fontWeight: FontWeight.w600, color: const Color(0xFFD0D0D0)),
+                ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Text(
-                "Сот/Участок ${widget.plot.acreage}",
-                style: GoogleFonts.poppins(fontSize: 9, fontWeight: FontWeight.w600, color: const Color(0xFFB9B9B9)),
+              const SizedBox(height: 6),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: padding),
+                child: Text(
+                  "${widget.plot.price} ТГ",
+                  style: GoogleFonts.poppins(fontSize: priceFontSize, fontWeight: FontWeight.w600, color: const Color(0xFF1A75FF)),
+                ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      widget.plot.status ?? '',
-                      style: GoogleFonts.poppins(
-                          fontSize: 9,
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: padding),
+                child: Text(
+                  "Сот/Участок ${widget.plot.acreage}",
+                  style: GoogleFonts.poppins(fontSize: addressFontSize, fontWeight: FontWeight.w600, color: const Color(0xFFB9B9B9)),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: padding),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        widget.plot.status ?? '',
+                        style: GoogleFonts.poppins(
+                          fontSize: addressFontSize,
                           fontWeight: FontWeight.w600,
                           color: widget.plot.status == 'Продается'
                               ? Colors.green
                               : widget.plot.status == 'Продано'
                                   ? Colors.red
-                                  : const Color(0xFFB9B9B9)),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
+                                  : const Color(0xFFB9B9B9),
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                      ),
                     ),
-                  ),
-                  GestureDetector(
-                    onTap: () {
-                      if (widget.user?.userType == 'customer') {
-                        toggleFavorite();
-                      }
-                    },
-                    child: widget.user?.userType == 'customer'
-                        ? Icon(isFavorite == false ? Icons.favorite_border : Icons.favorite, color: isFavorite == false ? Colors.white : Colors.red)
-                        : SvgPicture.asset('lib/assets/icons/Vector.svg', height: 16),
-                  ),
-                ],
+                    GestureDetector(
+                      onTap: () {
+                        if (widget.user?.userType == 'customer') {
+                          toggleFavorite();
+                        }
+                      },
+                      child: widget.user?.userType == 'customer'
+                          ? Icon(
+                              isFavorite == false ? Icons.favorite_border : Icons.favorite,
+                              color: isFavorite == false ? Colors.white : Colors.red,
+                              size: iconSize,
+                            )
+                          : SvgPicture.asset('lib/assets/icons/Vector.svg', height: iconSize),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
-        ),
-      ),
+            ],
+          ),
+        );
+      },
     );
+
+    // GestureDetector(
+    //   onTap: () {
+    //     Navigator.push(
+    //       context,
+    //       MaterialPageRoute(
+    //         builder: (context) => BlocProvider(
+    //           create: (context) => GetPlotsBloc(FirebasePlotsRepo()),
+    //           child: CurrentFacilityScreen(plot: widget.plot, user: widget.user),
+    //         ),
+    //       ),
+    //     ).then(
+    //       (value) {
+    //         if (value != null) {
+    //           context.read<GetPlotsBloc>().add(GetPlots(userType: widget.user?.userType, userId: widget.user?.userId));
+    //         }
+    //       },
+    //     );
+    //   },
+    //   child: Container(
+    //     decoration: BoxDecoration(
+    //       color: const Color(0xFF151515),
+    //       borderRadius: BorderRadius.circular(10.0),
+    //     ),
+    //     child: Column(
+    //       crossAxisAlignment: CrossAxisAlignment.start,
+    //       children: [
+    //         ClipRRect(
+    //           borderRadius: BorderRadius.circular(10.0),
+    //           child: images!.isNotEmpty
+    //               ? CachedNetworkImage(
+    //                   imageUrl: images.first ?? '',
+    //                   fit: BoxFit.cover,
+    //                   width: MediaQuery.of(context).size.width,
+    //                   height: 110,
+    //                 )
+    //               : Image.asset(
+    //                   'lib/assets/icons/plot.jpg',
+    //                   fit: BoxFit.cover,
+    //                   width: MediaQuery.of(context).size.width,
+    //                   height: 110,
+    //                 ),
+    //         ),
+    //         const SizedBox(height: 6),
+    //         Padding(
+    //           padding: const EdgeInsets.symmetric(horizontal: 12),
+    //           child: Text(
+    //             address,
+    //             overflow: TextOverflow.ellipsis,
+    //             maxLines: 1,
+    //             style: GoogleFonts.poppins(fontSize: 12, fontWeight: FontWeight.w600, color: const Color(0xFFD0D0D0)),
+    //           ),
+    //         ),
+    //         const SizedBox(height: 6),
+    //         Padding(
+    //           padding: const EdgeInsets.symmetric(horizontal: 12),
+    //           child: Text(
+    //             "${widget.plot.price} ТГ",
+    //             style: GoogleFonts.poppins(fontSize: 9, fontWeight: FontWeight.w600, color: const Color(0xFF1A75FF)),
+    //           ),
+    //         ),
+    //         Padding(
+    //           padding: const EdgeInsets.symmetric(horizontal: 12),
+    //           child: Text(
+    //             "Сот/Участок ${widget.plot.acreage}",
+    //             style: GoogleFonts.poppins(fontSize: 9, fontWeight: FontWeight.w600, color: const Color(0xFFB9B9B9)),
+    //           ),
+    //         ),
+    //         Padding(
+    //           padding: const EdgeInsets.symmetric(horizontal: 12),
+    //           child: Row(
+    //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    //             children: [
+    //               Expanded(
+    //                 child: Text(
+    //                   widget.plot.status ?? '',
+    //                   style: GoogleFonts.poppins(
+    //                       fontSize: 9,
+    //                       fontWeight: FontWeight.w600,
+    //                       color: widget.plot.status == 'Продается'
+    //                           ? Colors.green
+    //                           : widget.plot.status == 'Продано'
+    //                               ? Colors.red
+    //                               : const Color(0xFFB9B9B9)),
+    //                   overflow: TextOverflow.ellipsis,
+    //                   maxLines: 1,
+    //                 ),
+    //               ),
+    //               GestureDetector(
+    //                 onTap: () {
+    //                   if (widget.user?.userType == 'customer') {
+    //                     toggleFavorite();
+    //                   }
+    //                 },
+    //                 child: widget.user?.userType == 'customer'
+    //                     ? Icon(isFavorite == false ? Icons.favorite_border : Icons.favorite, color: isFavorite == false ? Colors.white : Colors.red)
+    //                     : SvgPicture.asset('lib/assets/icons/Vector.svg', height: 16),
+    //               ),
+    //             ],
+    //           ),
+    //         ),
+    //       ],
+    //     ),
+    //   ),
+    // );
   }
 }
