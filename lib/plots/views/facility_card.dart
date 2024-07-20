@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:a_group/auth/auth_repository/models/user_model.dart';
 import 'package:a_group/plots/bloc/plots_bloc.dart';
 import 'package:a_group/plots/plots_repository/firebase_plots_repository.dart';
@@ -9,6 +11,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class FacilityCard extends StatefulWidget {
   final Plot plot;
@@ -62,18 +65,34 @@ class _FacilityCardState extends State<FacilityCard> {
     }
   }
 
+  void openWhatsapp({required BuildContext context, required String text, required String number}) async {
+    var whatsapp = number; //+92xx enter like this
+    var whatsappURlAndroid = "whatsapp://send?phone=" + whatsapp + "&text=$text";
+    var whatsappURLIos = "https://wa.me/$whatsapp?text=${Uri.tryParse(text)}";
+    if (Platform.isIOS) {
+      // for iOS phone only
+      if (await canLaunchUrl(Uri.parse(whatsappURLIos))) {
+        await launchUrl(Uri.parse(
+          whatsappURLIos,
+        ));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Whatsapp не установлен")));
+      }
+    } else {
+      // android , web
+      if (await canLaunchUrl(Uri.parse(whatsappURlAndroid))) {
+        await launchUrl(Uri.parse(whatsappURlAndroid));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Whatsapp не установлен")));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final images = widget.plot.images?.where((element) => element.contains('.jpg')).toList();
     return LayoutBuilder(
       builder: (context, constraints) {
-        // double screenWidth = constraints.maxWidth;
-        // double imageHeight = screenWidth * 0.6;
-        // double padding = screenWidth * 0.04;
-        // double textFontSize = screenWidth * 0.05;
-        // double statusFontSize = screenWidth * 0.035;
-        // double iconSize = screenWidth * 0.1;
-
         double screenWidth = constraints.maxWidth;
         double imageHeight = screenWidth * 0.450; // Adjust based on your design
         double padding = screenWidth * 0.03;
@@ -89,32 +108,74 @@ class _FacilityCardState extends State<FacilityCard> {
             color: const Color(0xFF151515),
             borderRadius: BorderRadius.circular(10.0),
           ),
-          height: containerHeight, // Set the height of the container
+          height: containerHeight,
           width: screenWidth,
-          // padding: EdgeInsets.only(
-          //   left: 5,
-          //   right: 5,
-          // ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               GestureDetector(
                 onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => BlocProvider(
-                        create: (context) => GetPlotsBloc(FirebasePlotsRepo()),
-                        child: CurrentFacilityScreen(plot: widget.plot, user: widget.user),
+                  if (widget.user?.userType == 'customer') {
+                    if (widget.user?.hasActiveCart ?? false) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => BlocProvider(
+                            create: (context) => GetPlotsBloc(FirebasePlotsRepo()),
+                            child: CurrentFacilityScreen(plot: widget.plot, user: widget.user),
+                          ),
+                        ),
+                      ).then(
+                        (value) {
+                          if (value != null) {
+                            context.read<GetPlotsBloc>().add(GetPlots(userType: widget.user?.userType, userId: widget.user?.userId));
+                          }
+                        },
+                      );
+                    } else {
+                      showAdaptiveDialog(
+                        context: context,
+                        builder: (_) {
+                          return AlertDialog(
+                            actionsAlignment: MainAxisAlignment.center,
+                            content: Text(
+                              'Для дальнейшего просмотра нужно оплатить подписку',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(fontSize: 16),
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () async {
+                                  Navigator.pop(context);
+                                  openWhatsapp(context: context, text: '', number: widget.plot.myUser?.phone ?? '');
+                                },
+                                child: Text(
+                                  'Узнать цену',
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                              )
+                            ],
+                          );
+                        },
+                      );
+                    }
+                  } else {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => BlocProvider(
+                          create: (context) => GetPlotsBloc(FirebasePlotsRepo()),
+                          child: CurrentFacilityScreen(plot: widget.plot, user: widget.user),
+                        ),
                       ),
-                    ),
-                  ).then(
-                    (value) {
-                      if (value != null) {
-                        context.read<GetPlotsBloc>().add(GetPlots(userType: widget.user?.userType, userId: widget.user?.userId));
-                      }
-                    },
-                  );
+                    ).then(
+                      (value) {
+                        if (value != null) {
+                          context.read<GetPlotsBloc>().add(GetPlots(userType: widget.user?.userType, userId: widget.user?.userId));
+                        }
+                      },
+                    );
+                  }
                 },
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(10.0),

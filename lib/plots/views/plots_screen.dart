@@ -48,6 +48,11 @@ class _PlotsScreenState extends State<PlotsScreen> {
           return Future.delayed(
               const Duration(seconds: 1), () => context.read<GetPlotsBloc>().add(GetPlots(userType: myUser?.userType, userId: myUser?.userId)));
         } else {
+          context.read<AuthenticationBloc>().userRepository.user.first.then((value) {
+            setState(() {
+              myUser = value;
+            });
+          });
           return Future.delayed(const Duration(seconds: 1), () => context.read<GetPlotsBloc>().add(GetUsers()));
         }
       },
@@ -136,6 +141,10 @@ class _PlotsScreenState extends State<PlotsScreen> {
             } else if (state is GetUsersSuccess) {
               return Column(
                 children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text('Список менеджеров\nпо участкам', style: TextStyle(color: Colors.white, fontSize: 22), textAlign: TextAlign.center),
+                  ),
                   Expanded(
                     child: ListView.builder(
                       itemCount: state.users.length,
@@ -179,7 +188,7 @@ class _PlotsScreenState extends State<PlotsScreen> {
                                         style: const TextStyle(color: Colors.grey),
                                       ),
                                       Text(
-                                        phone.getMaskedText(),
+                                        myUser?.hasActiveCart ?? false ? phone.getMaskedText() : '',
                                         style: const TextStyle(color: Colors.grey),
                                       ),
                                     ],

@@ -36,13 +36,19 @@ class _YHeaderImagesState extends State<HeaderImages> {
               },
               icon: const Icon(
                 Icons.arrow_back_ios_new,
-                color: Colors.white,
+                color: Colors.black,
               )),
         ),
-        // _HeaderSummary(
-        //   facility: widget.facility,
-        //   length: widget.images.length,
-        //   streamController: streamController,
+        // Align(
+        //   alignment: Alignment.topRight,
+        //   child: IconButton(
+        //       onPressed: () {
+        //         Navigator.pop(context);
+        //       },
+        //       icon: const Icon(
+        //         Icons.close,
+        //         color: Colors.black,
+        //       )),
         // ),
       ],
     );

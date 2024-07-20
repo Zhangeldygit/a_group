@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:a_group/auth/auth_repository/models/user_model.dart';
 import 'package:a_group/plots/bloc/plots_bloc.dart';
 import 'package:a_group/plots/views/facility_card.dart';
@@ -5,6 +7,7 @@ import 'package:a_group/plots/views/map_facilities_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class UserPlotsScreen extends StatefulWidget {
   const UserPlotsScreen({super.key, required this.user, this.currentUser});
@@ -16,6 +19,29 @@ class UserPlotsScreen extends StatefulWidget {
 }
 
 class _UserPlotsScreenState extends State<UserPlotsScreen> {
+  void openWhatsapp({required BuildContext context, required String text, required String number}) async {
+    var whatsapp = number; //+92xx enter like this
+    var whatsappURlAndroid = "whatsapp://send?phone=" + whatsapp + "&text=$text";
+    var whatsappURLIos = "https://wa.me/$whatsapp?text=${Uri.tryParse(text)}";
+    if (Platform.isIOS) {
+      // for iOS phone only
+      if (await canLaunchUrl(Uri.parse(whatsappURLIos))) {
+        await launchUrl(Uri.parse(
+          whatsappURLIos,
+        ));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Whatsapp не установлен")));
+      }
+    } else {
+      // android , web
+      if (await canLaunchUrl(Uri.parse(whatsappURlAndroid))) {
+        await launchUrl(Uri.parse(whatsappURlAndroid));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Whatsapp не установлен")));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,11 +63,42 @@ class _UserPlotsScreenState extends State<UserPlotsScreen> {
                   children: [
                     const Spacer(),
                     GestureDetector(
-                      onTap: () => showBottomSheet(
-                        context: context,
-                        builder: (context) => MapFacilitiesScreen(plots: state.plots),
-                        enableDrag: false,
-                      ),
+                      onTap: () {
+                        print(widget.currentUser?.hasActiveCart);
+                        if (widget.currentUser?.hasActiveCart ?? false) {
+                          showBottomSheet(
+                            context: context,
+                            builder: (context) => MapFacilitiesScreen(plots: state.plots),
+                            enableDrag: false,
+                          );
+                        } else {
+                          showAdaptiveDialog(
+                            context: context,
+                            builder: (_) {
+                              return AlertDialog(
+                                actionsAlignment: MainAxisAlignment.center,
+                                content: Text(
+                                  'Для дальнейшего просмотра нужно оплатить подписку',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () async {
+                                      Navigator.pop(context);
+                                      openWhatsapp(context: context, text: '', number: state.plots.first.myUser?.phone ?? '');
+                                    },
+                                    child: Text(
+                                      'Узнать цену',
+                                      style: TextStyle(fontSize: 16),
+                                    ),
+                                  )
+                                ],
+                              );
+                            },
+                          );
+                        }
+                      },
                       child: Container(
                         decoration: BoxDecoration(
                           color: const Color(0xFF006EFF),

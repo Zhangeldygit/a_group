@@ -17,16 +17,16 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   List<Plot> favoriteItems = [];
   MyUser? myUser;
 
-  void loadFavorites() async {
-    var box = await Hive.openBox('plots_${myUser?.userId}');
+  void loadFavorites(MyUser? user) async {
+    var box = await Hive.openBox('plots_${user?.userId}');
     favoriteItems = box.values.toList().cast<Plot>();
-    print('${favoriteItems}');
     setState(() {});
   }
 
   @override
   void initState() {
     context.read<AuthenticationBloc>().userRepository.user.first.then((value) {
+      loadFavorites(value);
       var box = Hive.box('plots_${value?.userId}');
       favoriteItems = box.values.toList().cast<Plot>();
       print('${value?.name}');

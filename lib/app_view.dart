@@ -1,6 +1,5 @@
 import 'package:a_group/auth/bloc/auth_bloc/auth_bloc.dart';
 import 'package:a_group/auth/bloc/sign_in_bloc/sign_in_bloc.dart';
-import 'package:a_group/components/colors.dart';
 import 'package:a_group/main_screen.dart';
 import 'package:a_group/plots/bloc/plots_bloc.dart';
 import 'package:a_group/plots/plots_repository/firebase_plots_repository.dart';
@@ -17,10 +16,6 @@ class MyAppView extends StatelessWidget {
     return MaterialApp(
         title: 'aGroup APP',
         debugShowCheckedModeBanner: false,
-        theme: ThemeData(
-          colorScheme:
-              const ColorScheme.light(background: AppColors.backgroundColor, onBackground: Colors.black, primary: Colors.blue, onPrimary: Colors.white),
-        ),
         home: BlocBuilder<AuthenticationBloc, AuthenticationState>(
           builder: ((context, state) {
             if (state.status == AuthenticationStatus.authenticated) {
