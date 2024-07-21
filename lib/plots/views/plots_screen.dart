@@ -176,22 +176,26 @@ class _PlotsScreenState extends State<PlotsScreen> {
                                 children: [
                                   const CircleAvatar(backgroundColor: Colors.grey, child: Icon(Icons.person_2_outlined)),
                                   SizedBox(width: 15),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        state.users[index].name,
-                                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                                      ),
-                                      Text(
-                                        state.users[index].email,
-                                        style: const TextStyle(color: Colors.grey),
-                                      ),
-                                      Text(
-                                        myUser?.hasActiveCart ?? false ? phone.getMaskedText() : '',
-                                        style: const TextStyle(color: Colors.grey),
-                                      ),
-                                    ],
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          state.users[index].name,
+                                          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                        ),
+                                        Text(
+                                          state.users[index].email,
+                                          style: const TextStyle(color: Colors.grey),
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 1,
+                                        ),
+                                        Text(
+                                          myUser?.hasActiveCart ?? false ? phone.getMaskedText() : '',
+                                          style: const TextStyle(color: Colors.grey),
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                   Spacer(),
                                   Text(
