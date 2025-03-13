@@ -7,6 +7,25 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:1008608758135:android:ad13226427b536d387b972",
+        "android_client_info": {
+          "package_name": "com.arnayi.a_group"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCdZcnR3KBPQYaBDPvbieNEkM0F074OJeQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:1008608758135:android:a3cf51722040674f87b972",
         "android_client_info": {
           "package_name": "com.example.a_group"

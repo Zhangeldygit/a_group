@@ -11,7 +11,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 
 class FirebasePlotsRepo implements PlotsRepository {
   final plotCollection = FirebaseFirestore.instance.collection('plots');
-  final sellersCollection = FirebaseFirestore.instance.collection('users');
+  final sellersCollection = FirebaseFirestore.instance.collection('sellers');
 
   @override
   Future<List<Plot>> getPlots({String? userType, String? userId}) async {
@@ -24,9 +24,12 @@ class FirebasePlotsRepo implements PlotsRepository {
 
         return plots;
       } else {
-        return plotCollection.get().then((value) => value.docs.map((e) => Plot.fromEntity(PlotEntity.fromDocument(e.data(), id: e.id))).toList());
+        final plots = plotCollection.get().then((value) => value.docs.map((e) => Plot.fromEntity(PlotEntity.fromDocument(e.data(), id: e.id))).toList());
+        print('plotf $plots');
+        return plots;
       }
     } catch (e) {
+      print(e);
       log("zannnn get plotsss ${e.toString()}");
       rethrow;
     }

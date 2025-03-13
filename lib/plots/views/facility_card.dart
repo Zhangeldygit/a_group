@@ -179,12 +179,18 @@ class _FacilityCardState extends State<FacilityCard> {
                 },
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(10.0),
-                  child: images!.isNotEmpty
+                  child: images!.isNotEmpty && images.first != null
                       ? CachedNetworkImage(
                           imageUrl: images.first ?? '',
                           fit: BoxFit.cover,
                           width: screenWidth,
                           height: imageHeight,
+                          errorWidget: (context, url, error) => Image.asset(
+                            'lib/assets/icons/plot.jpg',
+                            fit: BoxFit.cover,
+                            width: screenWidth,
+                            height: imageHeight,
+                          ),
                         )
                       : Image.asset(
                           'lib/assets/icons/plot.jpg',

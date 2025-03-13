@@ -1,4 +1,4 @@
-package com.example.a_group
+package com.arnayi.a_group
 
 import android.app.Application
 import io.flutter.plugin.common.PluginRegistry

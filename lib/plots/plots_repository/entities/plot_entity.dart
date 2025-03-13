@@ -58,7 +58,7 @@ class PlotEntity {
       name: doc['name'],
       price: doc['price'],
       status: doc['status'],
-      myUser: MyUserEntity.fromDocument(doc['user']),
+      myUser: doc['user'] != null ? MyUserEntity.fromDocument(doc['user']) : null,
       appointment: doc['appointment'],
       divisibility: doc['divisibility'],
     );

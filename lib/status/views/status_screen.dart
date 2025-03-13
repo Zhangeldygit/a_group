@@ -25,10 +25,13 @@ class _StatusScreenState extends State<StatusScreen> {
   @override
   void initState() {
     context.read<AuthenticationBloc>().userRepository.user.first.then((value) {
-      context.read<StatusCubit>().filterByCategory(userType: value?.userType, userId: value?.userId);
-      setState(() {
-        user = value;
-      });
+      // print('items ${value}');
+      if (value != null) {
+        context.read<StatusCubit>().filterByCategory(userType: value?.userType, userId: value?.userId);
+        setState(() {
+          user = value;
+        });
+      }
     });
 
     super.initState();
@@ -42,6 +45,7 @@ class _StatusScreenState extends State<StatusScreen> {
         children: [
           BlocBuilder<StatusCubit, List<Plot>>(
             builder: (context, plots) {
+              // print('plots $plots');
               return ListView.builder(
                 itemCount: plots.length, // Example item count
                 itemBuilder: (BuildContext context, int index) {

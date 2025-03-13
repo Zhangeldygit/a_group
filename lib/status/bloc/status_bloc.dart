@@ -18,10 +18,13 @@ class StatusCubit extends Cubit<List<Plot>> {
     String? userId,
   }) async {
     final items = await _plotsRepo.getPlots(userType: userType, userId: userId);
+    items.forEach(print);
 
     List<Plot> filteredPlots = items.where((plot) {
-      final matchesAcreage = (minAcreage == null || plot.acreage! >= minAcreage) && (maxAcreage == null || plot.acreage! <= maxAcreage);
-      final matchesPrice = (minPrice == null || plot.price! >= minPrice) && (maxPrice == null || plot.price! <= maxPrice);
+      final matchesAcreage = (minAcreage == null || plot.acreage != null && plot.acreage! >= minAcreage) &&
+          (maxAcreage == null || plot.acreage != null && plot.acreage! <= maxAcreage);
+      final matchesPrice =
+          (minPrice == null || plot.price != null && plot.price! >= minPrice) && (maxPrice == null || plot.price != null && plot.price! <= maxPrice);
       final matchesAppointment =
           appointment == null || (plot.appointment != null && plot.appointment!.trim().toLowerCase() == appointment.trim().toLowerCase());
       final matchesDivisibility =
